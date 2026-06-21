@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4u, babe >< </title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #fceef2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Music Controller */
+        .music-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* Card Container */
+        .quiz-container {
+            background: white;
+            width: 100%;
+            max-width: 360px;
+            border-radius: 24px;
+            padding: 30px 24px;
+            box-shadow: 0 10px 25px rgba(224, 75, 117, 0.15);
+            text-align: center;
+            border: 2px solid #fbcfe8;
+            position: relative;
+        }
+
+        .emoji-header {
+            font-size: 45px;
+            margin-bottom: 10px;
+        }
+
+        .question-number {
+            color: #db2777;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            color: #1f2937;
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        /* Welcome Screen Button & Options Buttons */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .option-btn, .start-btn {
+            background: #fff5f7;
+            border: 2px solid #fbcfe8;
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #374151;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .option-btn {
+            text-align: left;
+        }
+
+        .start-btn {
+            background: #db2777;
+            color: white;
+            font-weight: 600;
+            border: none;
+            margin-top: 15px;
+        }
+
+        .option-btn:active, .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Valentine Buttons Area */
+        .val-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            position: relative;
+            height: 55px;
+        }
+
+        .btn-yes, .btn-no {
+            padding: 12px 35px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-yes {
+            background: #db2777;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .btn-no {
+            background: #e5e7eb;
+            color: #4b5563;
+            position: absolute;
+            transition: all 0.1s ease-out;
+        }
+
+        .sub-text {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 15px;
+        }
+
+        /* Custom Popup Overlay */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .popup-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .popup-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .popup-overlay.active .popup-card {
+            transform: scale(1);
+        }
+
+        .popup-card.correct { border: 4px solid #22c55e; }
+        .popup-card.wrong { border: 4px solid #ef4444; }
+
+        .popup-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        .popup-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 400;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .popup-card.correct .popup-title { color: #22c55e; }
+        .popup-card.wrong .popup-title { color: #ef4444; }
+
+        .popup-btn {
+            margin-top: 15px;
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* Final Success Page Styles */
+        .success-text {
+            color: #4b5563;
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: justify;
+            margin: 15px 0;
+        }
+
+        .highlight-text {
+            color: #db2777;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="Track 5.mp3" type="audio/mp3">
+    </audio>
+
+    <button class="music-btn hidden" id="musicToggle">⏸️</button>
+
+    <div class="quiz-container">
+        <div id="welcome-screen">
+            <div class="emoji-header">⚠️📱🤫</div>
+            <div class="question-number" style="font-size: 20px;">Hai nisakk!</div>
+            <div class="question-text" style="font-size: 15px; font-weight: 500;">Web ini ada musiknya, soo keraskan volume HP kamu & nikmatin semuanyaa. Jangan dikecilin! 😜</div>
+            <button class="start-btn" id="startQuizBtn">Gas gak nih? 🚀</button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div class="emoji-header" id="emoji-box">🧸💝</div>
+            <div class="question-number" id="q-num">Pertanyaan 1</div>
+            <div class="question-text" id="q-text">Loading pertanyaan...</div>
+            <div class="options-list" id="options-box"></div>
+            <div class="sub-text" id="sub-text"></div>
+        </div>
+
+        <div id="success-screen" class="hidden">
+            <div class="emoji-header">🎉🥳💗</div>
+            <div class="question-number" style="font-size: 24px;">Iyakkk, Mauu nihh?</div>
+            <p class="success-text" style="text-align: center; font-weight: 500;">Makasih ya udah mauu sama aku! (Akhirnyaa kamu ngga nolak) 😂</p>
+            <p class="success-text">Intinya, sama kamu itu seru banget. Kadang bikin pusing karena kamunya hobi ngambek gak jelas, tapi tetep aja kamulah manusia paling favorit di hidup aku. Makasih ya udah mau bertahan dan dengerin kelakuan random aku tiap hari.</p>
+            <p class="highlight-text">Pokoknya tetep bareng aku terus ya, dilarang bosen! i <3 u 🧸💖</p>
+        </div>
+    </div>
+
+    <div class="popup-overlay" id="popup">
+        <div class="popup-card" id="popup-card">
+            <div class="emoji-header" id="popup-emoji">🥰</div>
+            <div class="popup-title" id="popup-title">Sip!</div>
+            <div class="popup-subtitle" id="popup-subtitle"></div>
+            <button class="popup-btn" id="popup-close">Lanjut</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Menurut kamu, apa hal paling penting biar hubungan kita awet? 🧸",
+                options: ["a) Saling percaya & komunikasi jujur", "b) Uang ajiiii, jajann teross", "c) Yang penting ganteng / cantik"],
+                correct: 0,
+                msgCorrect: "Nah bener! Tumben pinter wkwk 😂",
+                msgWrong: "Yeee lebih penting jajan sama tampang doang gituu yakk! Ganti nggakk! 😜"
+            },
+            {
+                question: "Cara paling ampuh bikin acuu senyum kalau lagi badmood? 😊",
+                options: ["a) Kasih kejutan kecil / hal manis random", "b) Dicuekin aja sampe taun depan", "c) Di-chat 'p' doang 100 kali"],
+                correct: 0,
+                msgCorrect: "Cakep, peka banget emang kesayangan aku! ❤️",
+                msgWrong: "Nyari ribut namanya itu maliiih! Ganti gak! 🤫"
+            },
+            {
+                question: "Ngobrol bareng paling sempurna itu kalau ngapain? 🌙",
+                options: ["a) Quality time berdua, ngobrol seru apa aja", "b) Main HP sendiri-sendiri dari awal dateng", "c) Diem-dieman kayak patung lilin"],
+                correct: 0,
+                msgCorrect: "Eaaak bener, yang penting kan berdua ya kan? ✨",
+                msgWrong: "Mending gak usah jalan kalau gitu wkwk, coba lagi!"
+            },
+            {
+                question: "Kalau lagi ada salah paham, bagusnya diapain? 💬",
+                options: ["a) Diomongin baik-baik pake kepala dingin", "b) Silent treatment / bales pake 'Gpp'", "c) Ngajak baku hantam sekalian"],
+                correct: 0,
+                msgCorrect: "Tumben dewasa banget, makin sayang deh! 🌸",
+                msgWrong: "Hih gembeng amat pake silent treatment, salah! 🤪"
+            },
+            {
+                question: "Will you be my valentine? (Mau gak jadi temenn aku terus?) 🧸👉👈💖",
+                options: null, 
+                subText: "(Tombol 'Gak' lagi sakitt, jadi gabisa berfungsi <hihi 😈)"
+            }
+        ];
+
+        let currentIdx = 0;
+        let firstInteraction = true;
+        const bgMusic = document.getElementById('bgMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        
+        const qNum = document.getElementById('q-num');
+        const qText = document.getElementById('q-text');
+        const optionsBox = document.getElementById('options-box');
+        const subText = document.getElementById('sub-text');
+        const popup = document.getElementById('popup');
+        const popupSubtitle = document.getElementById('popup-subtitle');
+
+        // Tombol Mulai Kuis
+        document.getElementById('startQuizBtn').addEventListener('click', () => {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            musicToggle.classList.remove('hidden');
+            
+            bgMusic.play().catch(error => {
+                console.log("Musik otomatis diblokir browser, menunggu interaksi kuis.");
+            });
+            loadQuestion();
+        });
+
+        musicToggle.addEventListener('click', () => {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                musicToggle.innerText = "⏸️";
+            } else {
+                bgMusic.pause();
+                musicToggle.innerText = "🎵";
+            }
+        });
+
+        function loadQuestion() {
+            const data = quizData[currentIdx];
+            subText.innerText = "";
+            optionsBox.innerHTML = "";
+            
+            qNum.innerText = `Pertanyaan ${currentIdx + 1}`;
+            qText.innerText = data.question;
+
+            if (data.options) {
+                data.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.classList.add('option-btn');
+                    btn.innerText = opt;
+                    btn.onclick = function() { checkAnswer(index); };
+                    optionsBox.appendChild(btn);
+                });
+            } else {
+                subText.innerText = data.subText;
+                
+                const valArea = document.createElement('div');
+                valArea.classList.add('val-buttons');
+                valArea.innerHTML = `
+                    <button class="btn-yes" id="yesBtn">Mau!</button>
+                    <button class="btn-no" id="noBtn">Gak</button>
+                `;
+                optionsBox.appendChild(valArea);
+
+                const noBtn = document.getElementById('noBtn');
+                const yesBtn = document.getElementById('yesBtn');
+
+                // Versi Pergerakan Tombol No yang Lama (Bisa lari radikal melayang bebas)
+                const moveNoButton = (e) => {
+                    if(e) e.preventDefault();
+                    const container = document.querySelector('.quiz-container');
+                    const maxX = container.clientWidth - noBtn.clientWidth - 20;
+                    const maxY = container.clientHeight - noBtn.clientHeight - 40;
+                    
+                    const randomX = Math.floor(Math.random() * maxX) - (maxX/2);
+                    const randomY = Math.floor(Math.random() * maxY) - (maxY/2);
+                    
+                    noBtn.style.left = `${randomX + 100}px`;
+                    noBtn.style.top = `${randomY + 20}px`;
+                };
+
+                noBtn.addEventListener('mouseenter', moveNoButton);
+                noBtn.addEventListener('touchstart', moveNoButton);
+
+                yesBtn.onclick = function() {
+                    document.getElementById('quiz-screen').classList.add('hidden');
+                    document.getElementById('success-screen').classList.remove('hidden');
+                };
+            }
+        }
+
+        function checkAnswer(selectedIdx) {
+            const data = quizData[currentIdx];
+            const pCard = document.getElementById('popup-card');
+            const pTitle = document.getElementById('popup-title');
+            const pEmoji = document.getElementById('popup-emoji');
+
+            popupSubtitle.innerText = "";
+
+            if (bgMusic.paused) {
+                bgMusic.play().catch(()=>{});
+                musicToggle.innerText = "⏸️";
+            }
+
+            if (selectedIdx === data.correct) {
+                pCard.className = "popup-card correct";
+                pTitle.innerText = data.msgCorrect;
+                pEmoji.innerText = "😎";
+
+                if (firstInteraction) {
+                    popupSubtitle.innerText = "gokill ga nih lagunya? kalo ngga matiin aja yak :3 🎶";
+                    firstInteraction = false;
+                }
+
+                document.getElementById('popup-close').onclick = function() {
+                    popup.classList.remove('active');
+                    currentIdx++;
+                    loadQuestion();
+                };
+            } else {
+                pCard.className = "popup-card wrong";
+                pTitle.innerText = data.msgWrong;
+                pEmoji.innerText = "😜";
+                document.getElementById('popup-close').onclick = function() {
+                    popup.classList.remove('active');
+                };
+            }
+            popup.classList.add('active');
+        }
+    </script>
+</body>
+</html>
