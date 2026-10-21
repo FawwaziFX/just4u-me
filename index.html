@@ -93,9 +93,11 @@ small,.small{font-size:.86em}
 .fig span{display:block;max-width:24ch;color:var(--mute);font-size:.9em;line-height:1.45}
 
 /* timeline */
-.years{display:flex;flex-wrap:wrap;gap:0;margin:34px 0 14px;border-bottom:2px solid var(--line)}
-.years button{font:700 1rem var(--head);padding:10px 18px 10px 0;margin-right:18px;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--mute);cursor:pointer}
-.years button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--red)}
+.tl-hint{margin:34px 0 10px;color:var(--red);font:700 .9rem var(--head);letter-spacing:.01em}
+.years{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}
+.years button{font:700 1rem var(--head);min-height:44px;padding:8px 20px;background:#fff;border:2px solid var(--line);border-radius:999px;color:var(--ink);cursor:pointer}
+.years button:hover{border-color:var(--navy)}
+.years button[aria-selected=true]{background:var(--navy);border-color:var(--navy);color:#fff}
 #tl{min-height:6.5em}
 #tl h3{margin-bottom:4px}
 
@@ -225,6 +227,7 @@ ul.plain li:last-child{border-bottom:1px solid var(--line)}
       <div class="fig"><b>8x</b><span>Pendapatan tahunan naik dari €99 juta menjadi €801,8 juta</span></div>
       <div class="fig"><b>€2,28 mi.</b><span>Total belanja pemain sejak QSI masuk</span></div>
     </div>
+    <p class="tl-hint">Ketuk tahun atau geser untuk melihat peristiwanya</p>
     <div class="years" role="tablist" aria-label="Tahun">
       <button role="tab" aria-selected="true" data-i="0">1970</button>
       <button role="tab" aria-selected="false" data-i="1">2011</button>
@@ -324,8 +327,7 @@ ul.plain li:last-child{border-bottom:1px solid var(--line)}
   <div class="box">
     <div class="txt">
       <h2 id="start-t">Mulai?</h2>
-      <p>Naikkan volume perangkat dan matikan mode senyap. Tekan Tes suara untuk memastikan terdengar.</p>
-      <button type="button" id="test-btn" style="margin-right:12px">Tes suara</button><button type="button" id="start-btn">Mulai</button>
+      <button type="button" id="start-btn">Mulai</button>
     </div>
   </div>
 </div>
@@ -360,6 +362,7 @@ function show(n){
   document.body.classList.toggle('dk',dark);
   document.querySelectorAll('#bg .m').forEach((m,i)=>m.classList.toggle('on',i===cur));
   playBar(slides[cur].id==='rev');
+  playTl(slides[cur]===tlSlide);
 }
 let tx=null,ty=0,lock=0;
 document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
@@ -383,12 +386,37 @@ const TL=[
  ['2021','Lionel Messi bergabung dan bermain bersama Mbappé dan Neymar. Pengikut digital klub melonjak.']
 ];
 const tl=document.getElementById('tl'), tabs=[...document.querySelectorAll('.years button')];
+let tlI=0,tlTimer=null;
 function setTl(i){
+  tlI=i;
   tabs.forEach((b,j)=>b.setAttribute('aria-selected',j===i));
   tl.innerHTML='<h3></h3><p></p>';
   tl.firstChild.textContent=TL[i][0]; tl.lastChild.textContent=TL[i][1];
 }
-tabs.forEach(b=>b.onclick=()=>setTl(+b.dataset.i)); setTl(0);
+function stopTl(){clearInterval(tlTimer);tlTimer=null}
+tabs.forEach(b=>b.onclick=()=>{stopTl();setTl(+b.dataset.i)}); setTl(0);
+const tlSlide=document.querySelector('.years').closest('.slide');
+/* Saat slide dibuka, tahun jalan sendiri sebagai contoh. Berhenti begitu disentuh. */
+function playTl(on){
+  stopTl();
+  if(!on)return;
+  setTl(0);
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  tlTimer=setInterval(()=>{if(tlI<TL.length-1)setTl(tlI+1);else stopTl()},4000);
+}
+/* Geser kiri/kanan di area tahun = ganti tahun. Di tahun pertama/terakhir, geser tetap pindah slide. */
+[document.querySelector('.years'),document.getElementById('tl')].forEach(el=>{
+  let x=null,y=0;
+  el.addEventListener('touchstart',e=>{x=e.touches[0].clientX;y=e.touches[0].clientY},{passive:true});
+  el.addEventListener('touchend',e=>{
+    if(x===null)return;
+    const dx=e.changedTouches[0].clientX-x,dy=e.changedTouches[0].clientY-y;x=null;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){
+      const n=tlI+(dx<0?1:-1);
+      if(n>=0&&n<TL.length){stopTl();setTl(n);e.stopPropagation()}
+    }
+  },{passive:true});
+});
 
 const REV=[
  ['Komersial dan sponsor','50%','€397,5 juta','Sponsor, merchandise, dan kemitraan merek seperti Jordan, Qatar Airways, dan GOAT.'],
@@ -531,8 +559,6 @@ setInterval(()=>{
   if(now-lastTick>2000)leave();
   lastTick=now;
 },500);
-
-document.getElementById('test-btn').addEventListener('click',()=>{unlockAudio();unlockHtmlAudio();setTimeout(playSound,150)});
 
 /* ===== Gerbang mulai: satu ketukan agar browser mengizinkan suara sejak notice pertama ===== */
 document.getElementById('start-btn').addEventListener('click',()=>{
